@@ -46,20 +46,32 @@ def csv_from_excel(filename):
 
 		for rownum in range(sheet.nrows):
 		    date = sheet.row_values(rownum)[1]
+		    ids = sheet.row_values(rownum)[0]
+		    deviceId = sheet.row_values(rownum)[4]
+		    mobile = sheet.row_values(rownum)[6]
+		    dor = sheet.row_values(rownum)[10]
+		    if isinstance( ids, float) or isinstance( ids, long ):
+		    	ids = int(float(ids))
+		    if isinstance( deviceId, float) or isinstance( deviceId, long ):
+		    	deviceId = int(float(deviceId))
+		    if isinstance( mobile, float) or isinstance( mobile, long ):
+		    	mobile = int(float(mobile))
+		    if isinstance( dor, float) or isinstance( dor, long ):
+		    	dor = int(float(dor))
 		    if isinstance( date, float) or isinstance( date, long ):
 		        year, month, day, hour, minute, sec = xlrd.xldate_as_tuple(date, book.datemode)
 		        py_date = "%02d-%02d-%04d" % (day, month, year)
-		        wr.writerow(sheet.row_values(rownum)[0:1] + [py_date] + sheet.row_values(rownum)[2:])
+		        wr.writerow([ids] + [py_date] + sheet.row_values(rownum)[2:4] + [deviceId] + sheet.row_values(rownum)[5:6] + [mobile] + sheet.row_values(rownum)[7:10] + [dor] + sheet.row_values(rownum)[11:])
 		    else:
-		    	# print sheet.row_values(rownum)
-		        wr.writerow(sheet.row_values(rownum))
+		        wr.writerow([ids] + sheet.row_values(rownum)[1:4] + [deviceId] + sheet.row_values(rownum)[5:6] + [mobile] + sheet.row_values(rownum)[7:10] + [dor] + sheet.row_values(rownum)[11:])
+
 		csvfile.close()
 		return True
 	except Exception as e:
 		print e
 		return False
 
-def strtConver(yesterday, today):
+def getDifference(yesterday, today):
 	if yesterday != today:
 		ystrdyFile = file(yesterday+'.csv', 'r')
 		todayFile = file(today+'.csv', 'r')
@@ -148,11 +160,11 @@ if __name__ == '__main__':
 			if csv_from_excel(yesterday):
 				print '\n result is \n'
 				print '\n conversion successfull\n\n now comparing two files\n'
-				strtConver(yesterday, today)
-	# print strtConver(yesterday, today)
+				getDifference(yesterday, today)
+	# print getDifference(yesterday, today)
 				print '\n open results.csv to check difference\n'
 			else:
-				strtConver(today, today)
+				getDifference(today, today)
 		else:
 			print 'something wrong while converting to csv\n'
 	else:
