@@ -26,7 +26,7 @@ def listFiles():
 
 
 def downloadFile():
-	gauth = GoogleAuth('out/settings.yaml')
+	gauth = GoogleAuth('settings.yaml')
 	gauth.LocalWebserverAuth()
 	drive = GoogleDrive(gauth)
 	myfile = drive.CreateFile({'id': '1CLYrVDTixpPRCnrQG6uzoboW6c8IfI-TXY-Q1pFH5jM'})
@@ -61,44 +61,49 @@ def csv_from_excel(filename):
 
 def strtConver(yesterday, today):
 	if yesterday != today:
-		f1 = file(yesterday+'.csv', 'r')
-		f2 = file(today+'.csv', 'r')
+		ystrdyFile = file(yesterday+'.csv', 'r')
+		todayFile = file(today+'.csv', 'r')
 
-		c1 = csv.reader(f1)
-		c2 = csv.reader(f2)
-
-		fst = []
-		fst2 = []
-		scnd = []
-		scnd2 = []
-
-		for fstrow in c1:
-			for data in fstrow:
-				fst.append(data)
-			fst2.append(fst)
-			fst = []
-		for scndrow in c2:
+		ystrdyCsv = csv.reader(ystrdyFile)
+		todayCsv = csv.reader(todayFile)
+		ystrdyCsvData = sorted(ystrdyCsv, key=lambda row: row[4], reverse=True)
+		todayCsvData = sorted(todayCsv, key=lambda row: row[4], reverse=True)
+		ystrdyRow = []
+		ystrdyData = []
+		todayRow = []
+		todayData = []
+		for ystrdyRowrow in ystrdyCsvData:
+			for data in ystrdyRowrow:
+				ystrdyRow.append(data)
+			ystrdyData.append(ystrdyRow)
+			ystrdyRow = []
+		for scndrow in todayCsvData:
 			for data in scndrow:
-				scnd.append(data)
-			scnd2.append(scnd)
-			scnd = []
+				todayRow.append(data)
+			todayData.append(todayRow)
+			todayRow = []
 		changes = {}
-		for datas in scnd2:
-			if not datas in fst2:
-				##############
-				for row in range(len(scnd2)):
-					if scnd2[row] == datas:
-						for col in range(len(scnd2[row])):
-							if(datas[col] != fst2[row][col]):
-								changes[row] = {}
-								changes[row][ scnd2[1][col] ] = {}
-								changes[row][ scnd2[1][col] ]['new'] = scnd2[row][col]
-								changes[row][ scnd2[1][col] ]['old'] = fst2[row][col]
+		for datas in todayData:
+			if not datas in ystrdyData:
+				for row in range(len(todayData)):
+					if todayData[row] == datas:
+						changes[ todayData[row][4] ] = {}
+						for col in range(len(todayData[row])):
+							changes[ todayData[row][4] ][ todayData[0][col] ] = {}
+							changes[ todayData[row][4] ][ todayData[0][col] ]['new'] = todayData[row][col]
+							changes[ todayData[row][4] ][ todayData[0][col] ]['old'] = ystrdyData[row][col]
+							# if(todayData[row][col] != ystrdyData[row][col]):
+								# for unsortedRow in range(le)
+								# changes[row][ todayData[0][col] ]['new'] = todayData[row][col]
+								# changes[row][ todayData[0][col] ]['old'] = ystrdyData[row][col]
 								
-				############## 
-		# print changes
-		f1.close()
-		f2.close()
+		ystrdyFile.close()
+		todayFile.close()
+		# for datas in changes:
+		# 	for colName in changes[datas]:
+		# 		for data in changes[datas][colName]:
+		# 			print str(datas)+" : "+str(colName)+' : '+str(data)+' : '+str(changes[datas][colName][data])
+		print changes
 		return changes
 	else:
 		return False
@@ -141,13 +146,14 @@ if __name__ == '__main__':
 		print '\n now trying to convert xlsx to csv'
 		if csv_from_excel(today):
 			if csv_from_excel(yesterday):
-				print '\n conversion successfull\n\n now comparing two files'
+				print '\n result is \n'
+				print '\n conversion successfull\n\n now comparing two files\n'
 				strtConver(yesterday, today)
 	# print strtConver(yesterday, today)
-				print '\n open results.csv to check difference'
+				print '\n open results.csv to check difference\n'
 			else:
 				strtConver(today, today)
 		else:
-			print 'something wrong while converting to csv'
+			print 'something wrong while converting to csv\n'
 	else:
-		print 'no file downloaded'
+		print 'no file downloaded\n'
